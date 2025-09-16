@@ -4,6 +4,8 @@ import {
   prop,
   Ref,
   Severity,
+  index,
+  DocumentType
 } from "@typegoose/typegoose";
 import { User } from "./userModel";
 
@@ -15,8 +17,10 @@ import { User } from "./userModel";
     allowMixed: Severity.ALLOW,
   },
 })
+
+// @index({ userId: 1 }) // fast lookup by user
 export class Wallet {
-  @prop({ required: true, ref: () => User })
+  @prop({ required: true, ref: () => User, unique:true })
   userId!: Ref<User>; 
 
   @prop({ required: true, default: 0 })
@@ -34,3 +38,5 @@ export class Wallet {
 
 const WalletModel = getModelForClass(Wallet);
 export default WalletModel;
+
+export type WalletDoc = DocumentType<Wallet>;

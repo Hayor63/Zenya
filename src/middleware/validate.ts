@@ -1,9 +1,12 @@
-import { ZodTypeAny } from "zod"; // 👈 changed from AnyZodObject
+// The validate middleware ensures that the incoming data matches the defined Zod schema. 
+// If the data is invalid, it stops the request and sends an error response.
+
+import { ZodObject } from "zod";
 import { Request, Response, NextFunction } from "express";
 import APIResponse from "../utils/api";
 
 const validate =
-  (schema: ZodTypeAny) => // 👈 this now accepts any Zod schema (including ZodEffects)
+  (schema: ZodObject) =>
   (req: Request, res: Response, next: NextFunction): void | Promise<void> => {
     try {
       schema.parse({
@@ -11,19 +14,9 @@ const validate =
         query: req.query,
         params: req.params,
       });
-
-      console.log(req.params)
-
       next();
     } catch (error: any) {
-      if (error.issues && error.issues.length > 0) {
-        const firstError = error.issues[0];
-        const fieldPath = firstError.path.join(".");
-        const message = `${fieldPath}: ${firstError.message}`;
-        return APIResponse.error(message, 400).send(res);
-      }
-
-      return APIResponse.error("Validation failed", 400).send(res);
+      APIResponse.error(error.issues[0].message, 400).send(res);
     }
   };
 

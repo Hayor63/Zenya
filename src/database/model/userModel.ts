@@ -6,6 +6,7 @@ import {
   prop,
   Severity,
 } from "@typegoose/typegoose";
+import { Types } from "mongoose";
 import * as argon2 from "argon2";
 
 export const privateFields = ["password", "__v"];
@@ -35,6 +36,8 @@ export const privateFields = ["password", "__v"];
   return;
 })
 export class User {
+    readonly _id!: Types.ObjectId; // 👈 Add this line
+
   @prop({ required: true, trim: true })
   fullName!: string;
 
@@ -44,7 +47,7 @@ export class User {
   @prop({ required: true })
   password: string;
 
-  @prop({ enum: ["admin", "user"], required: true })
+  @prop({ enum: ["admin", "user"], default: "user" })
   role!: "admin" | "user";
 
   @prop({ default: false })

@@ -4,6 +4,7 @@ import {
   prop,
   Ref,
   Severity,
+  index
 } from "@typegoose/typegoose";
 import { Wallet } from "./walletModel";
 
@@ -15,20 +16,34 @@ import { Wallet } from "./walletModel";
     allowMixed: Severity.ALLOW,
   },
 })
-export class Transaction {
+@index({ reference: 1 }, { unique: true }) 
+
+export class InternalTransaction {
   @prop({ required: true, ref: () => Wallet })
-  walletId!: Ref<Wallet>; 
+  walletId!: Ref<Wallet>;
 
   @prop({ ref: () => Wallet })
-  fromWalletId?: Ref<Wallet>; 
+  fromWalletId?: Ref<Wallet>;
 
   @prop({ ref: () => Wallet })
-  toWalletId?: Ref<Wallet>; 
+  toWalletId?: Ref<Wallet>;
 
-  @prop({ required: true, default: 0 })
+  @prop({ required: true, min: 0 })
   amount!: number;
 
-  @prop({ required: true, default: "NGN" })
+  @prop({ required: true })
+  description!: string;
+
+  @prop({ required: true, default: 0 })
+  fees!: number;
+
+  @prop({ required: true })
+  balanceBefore!: number; 
+
+  @prop({ required: true })
+  balanceAfter!: number;
+
+  @prop({ required: true, default: "NGN", enum: ["NGN", "USD", "EUR"] })
   currency!: string;
 
   @prop({
@@ -37,6 +52,12 @@ export class Transaction {
     default: "pending",
   })
   status!: "pending" | "completed" | "failed";
+
+  @prop()
+  failureReason?: string;
+
+  @prop()
+  processedAt?: Date;
 
   @prop({ required: true, unique: true })
   reference!: string;
@@ -48,5 +69,5 @@ export class Transaction {
   metadata?: Record<string, any>;
 }
 
-const TransactionModel = getModelForClass(Transaction);
-export default TransactionModel;
+const InternalTransactionModel = getModelForClass(InternalTransaction);
+export default InternalTransactionModel;
