@@ -6,10 +6,10 @@ import WalletModel from "../../../database/model/walletModel";
 
 const updateWalletHandler = async (req: Request, res: Response) => {
   try {
-    const { walletId } = req.params;
+    const { id } = req.params;
     const { metadata } = req.body;
 // Checking if the walletId is a valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(walletId)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return APIResponse.error("Invalid wallet ID", 400).send(res);
     }
     // Validating that metadata is provided and is an object
@@ -21,7 +21,7 @@ const updateWalletHandler = async (req: Request, res: Response) => {
     }
 
      // updating the wallet in the database
-    const updatedWallet = await walletRepo.updateWallet(walletId, { metadata });
+    const updatedWallet = await walletRepo.updateWallet(id, { metadata });
 
     if (!updatedWallet) {
       return APIResponse.error("Wallet not found", 404).send(res);

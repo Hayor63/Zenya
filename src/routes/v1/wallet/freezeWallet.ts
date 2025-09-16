@@ -11,20 +11,20 @@ interface AuthenticatedRequest extends Request {
 
 const freezeWalletHandler = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { walletId } = req.params;
+    const { id } = req.params;
 
     // validating walletId exists
-    if (!walletId) {
+    if (!id) {
       return APIResponse.error("Wallet ID is required", 400).send(res);
     }
 
     //Validating ObjectId format
-    if (!mongoose.Types.ObjectId.isValid(walletId)) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
       return APIResponse.error("Invalid wallet ID format", 400).send(res);
     }
 
     // Checking if wallet exists and current status
-    const existingWallet = await walletRepo.getWalletById(walletId);
+    const existingWallet = await walletRepo.getWalletById(id);
     if (!existingWallet) {
       return APIResponse.error("Wallet not found", 404).send(res);
     }
@@ -34,7 +34,7 @@ const freezeWalletHandler = async (req: AuthenticatedRequest, res: Response) => 
     }
 
     //Freeze the wallet
-    const wallet = await walletRepo.freezeWallet(walletId);
+    const wallet = await walletRepo.freezeWallet(id);
 
     if (!wallet) {
       return APIResponse.error("Failed to freeze wallet", 500).send(res);
@@ -45,7 +45,7 @@ const freezeWalletHandler = async (req: AuthenticatedRequest, res: Response) => 
       {
         message: "Wallet frozen successfully",
         data: {
-          id: walletId, 
+           id: wallet._id.toString(),
           isFrozen: wallet.isFrozen,
           userId: wallet.userId, 
           balance: wallet.balance 

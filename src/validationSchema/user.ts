@@ -27,14 +27,14 @@ export const verifyOtpSchema = object({
       .length(6, "OTP must be 6 digits")
       .regex(/^\d+$/, "OTP must contain only numbers"),
 
-    email: string().nonempty("Email is required").email("Invalid email format"),
+    email: string().min(1, "Email is required").email("Invalid email format"),
   }),
 });
 
 // resend otp verification
 export const resendOtpVerificationSchema = object({
   body: object({
-    email: string().nonempty("Email is required").email("Invalid email format"),
+ email: string().min(1, "Email is required").email("Invalid email format"),
   }),
 });
 

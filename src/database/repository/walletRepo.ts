@@ -39,22 +39,22 @@ export default class walletRepo {
   }
 
   // Unfreeze wallet (admin)
-  static async unfreezeWallet(walletId: string): Promise<Wallet | null> {
+  static async unfreezeWallet(
+    walletId: string
+  ): Promise<DocumentType<Wallet> | null> {
     return WalletModel.findByIdAndUpdate(
       walletId,
       { isFrozen: false },
       { new: true }
-    )
-      .lean()
-      .exec();
+    ).exec();
   }
 
   // Update wallet metadata/currency (admin)
   static async updateWallet(
     walletId: string,
-    update: Partial<Pick<Wallet,  "metadata">>
-  ): Promise<DocumentType<Wallet>| null> {
-    return WalletModel.findByIdAndUpdate(walletId, update, { new: true })
+    update: Partial<Pick<Wallet, "metadata">>
+  ): Promise<DocumentType<Wallet> | null> {
+    return WalletModel.findByIdAndUpdate(walletId, update, { new: true });
   }
 
   // Delete wallet (admin)
