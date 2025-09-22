@@ -4,7 +4,7 @@ import {
   prop,
   Ref,
   Severity,
-  index
+  index,
 } from "@typegoose/typegoose";
 import { Wallet } from "./walletModel";
 import { InternalTransaction } from "./internalTransactionModel";
@@ -18,9 +18,8 @@ import { InternalTransaction } from "./internalTransactionModel";
   },
 })
 // quick lookup from webhook
-@index({ providerReference: 1 }) 
-
-export class ExternalPayment {
+@index({ providerReference: 1 })
+export class ExternalTransaction {
   @prop({ required: true, ref: () => InternalTransaction, index: true })
   transactionId!: Ref<InternalTransaction>;
 
@@ -39,23 +38,44 @@ export class ExternalPayment {
   provider!: string;
 
   @prop({ required: true })
-  amount!: number; // duplicate from transaction for reconciliation
+  amount!: number;
 
-  @prop({ required: true, default: "NGN", enum: ["NGN", "USD", "EUR"] })
-  currency!: string; // duplicate for reconciliation
+  @prop({ required: true, default: "NGN" })
+  currency!: string;
+
+  @prop({ required: true, enum: ["deposit", "withdrawal"] })
+  type!: "deposit" | "withdrawal";
 
   @prop()
-  providerReference?: string; // e.g. pi_123, flw_txn, bank txn id, crypto hash
+  serviceFee!: number; 
+
+  @prop()
+  providerReference?: string;
 
   @prop({ type: () => Object })
-  providerData?: Record<string, any>; // full webhook payload, response
+  providerData?: Record<string, any>;
 
   @prop()
-  fees?: number; // gateway fees
+  providerFee?: number;
 
   @prop({ enum: ["pending", "completed", "failed"], default: "pending" })
   status!: string;
 
   @prop()
+  processedAt?: Date;
+
+  @prop()
   gatewayResponse?: string;
+
+  @prop()
+  rawWebhookData?: Record<string, any>;
+
+  @prop({ default: 0 })
+  webhookAttempts?: number;
+
+  @prop()
+  lastWebhookAt?: Date;
 }
+
+const ExternalTransactionModel = getModelForClass(ExternalTransaction);
+export default ExternalTransactionModel;

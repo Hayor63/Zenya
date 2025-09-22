@@ -4,9 +4,10 @@ import {
   prop,
   Ref,
   Severity,
-  index
+  index,
 } from "@typegoose/typegoose";
 import { Wallet } from "./walletModel";
+import { User } from "./userModel";
 
 @modelOptions({
   schemaOptions: {
@@ -16,11 +17,13 @@ import { Wallet } from "./walletModel";
     allowMixed: Severity.ALLOW,
   },
 })
-@index({ reference: 1 }, { unique: true }) 
-
+@index({ reference: 1 }, { unique: true })
+@index({ status: 1, type: 1 })
+@index({ fromWalletId: 1, createdAt: -1 })
+@index({ toWalletId: 1, createdAt: -1 })
 export class InternalTransaction {
-  @prop({ required: true, ref: () => Wallet })
-  walletId!: Ref<Wallet>;
+  @prop({ ref: () => User })
+  userId!: Ref<User>;
 
   @prop({ ref: () => Wallet })
   fromWalletId?: Ref<Wallet>;
@@ -29,21 +32,21 @@ export class InternalTransaction {
   toWalletId?: Ref<Wallet>;
 
   @prop({ required: true, min: 0 })
-  amount!: number;
+  transferAmount!: number;
 
   @prop({ required: true })
   description!: string;
 
   @prop({ required: true, default: 0 })
-  fees!: number;
+  internalFees!: number;
 
   @prop({ required: true })
-  balanceBefore!: number; 
+  balanceBefore!: number;
 
   @prop({ required: true })
   balanceAfter!: number;
 
-  @prop({ required: true, default: "NGN", enum: ["NGN", "USD", "EUR"] })
+  @prop({ required: true, default: "NGN" })
   currency!: string;
 
   @prop({
@@ -59,14 +62,35 @@ export class InternalTransaction {
   @prop()
   processedAt?: Date;
 
-  @prop({ required: true, unique: true })
+  @prop({ ref: () => User })
+  lastModifiedBy?: Ref<User>;
+
+  @prop()
+  lastModifiedAt?: Date;
+
+  @prop({ required: true })
   reference!: string;
 
   @prop({ required: true, enum: ["deposit", "withdrawal", "transfer"] })
   type!: "deposit" | "withdrawal" | "transfer";
 
+  @prop({ default: false })
+  isSettled!: boolean;
+
+  @prop()
+  settledAt?: Date;
+
   @prop({ type: () => Object })
   metadata?: Record<string, any>;
+
+  @prop({ ref: () => InternalTransaction })
+  reversalId?: Ref<InternalTransaction>;
+
+  @prop({ default: false })
+  isReversed!: boolean;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const InternalTransactionModel = getModelForClass(InternalTransaction);

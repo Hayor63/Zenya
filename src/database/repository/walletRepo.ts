@@ -1,5 +1,6 @@
 import { DocumentType } from "@typegoose/typegoose";
 import WalletModel, { Wallet } from "../model/walletModel";
+import mongoose, { ClientSession } from "mongoose";
 
 export default class walletRepo {
   // Get the current user's wallet
@@ -17,9 +18,12 @@ export default class walletRepo {
     return wallet?.balance ?? null;
   }
 
-  // Get wallet by walletId(admin)
-  static async getWalletById(id: string): Promise<DocumentType<Wallet> | null> {
-    return await WalletModel.findById(id);
+  //get wallet by id
+  static async getWalletById(
+    id: string,
+    session: ClientSession | null = null
+  ): Promise<DocumentType<Wallet> | null> {
+    return WalletModel.findById(id).session(session);
   }
 
   // Get all wallets (admin)
@@ -55,6 +59,19 @@ export default class walletRepo {
     update: Partial<Pick<Wallet, "metadata">>
   ): Promise<DocumentType<Wallet> | null> {
     return WalletModel.findByIdAndUpdate(walletId, update, { new: true });
+  }
+
+  // update wallet balance
+  static async updateWalletBalance(
+    walletId: string,
+    newBalance: number,
+    session: ClientSession | null = null
+  ): Promise<void> {
+    await WalletModel.findByIdAndUpdate(
+      walletId,
+      { balance: newBalance },
+      { session, new: true }
+    );
   }
 
   // Delete wallet (admin)
